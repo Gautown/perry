@@ -655,7 +655,7 @@ fn lower_array_push_spread_spec_order(
 /// forwarding stub as it always did.
 const FIELD_WRITEBACK_BLOCKING_FLAGS_I16: &str = "2055";
 const POINTER_TAG_HI16: &str = "32765"; // 0x7FFD
-const HANDLE_BAND_TOP: &str = "1048575"; // 0x0FFFFF — objects are above
+const HANDLE_BAND_TOP: &str = crate::expr::receiver_range::HANDLE_BAND_TOP_LITERAL;
 const HANDLE_MASK_48: &str = "281474976710655"; // 0x0000_FFFF_FFFF_FFFF
 const GC_TYPE_OBJECT_I8: &str = "2";
 
