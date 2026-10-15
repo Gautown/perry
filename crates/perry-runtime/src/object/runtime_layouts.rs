@@ -154,6 +154,23 @@ macro_rules! runtime_layout {
     };
 }
 
+/// The runtime prototypes runtime layouts name (object model §3.6), each a
+/// family whose serial is its reserved intrinsic one. The runtime gives the
+/// prototype that serial when it builds it.
+macro_rules! runtime_prototype_family {
+    ($($name:ident = $serial:ident),* $(,)?) => {$(
+        pub(crate) static mut $name: crate::object::layout_desc::PerryProtoFamily =
+            crate::object::layout_desc::PerryProtoFamily { serial: crate::closure::shape::$serial };
+    )*};
+}
+runtime_prototype_family!(
+    URL_PROTO_FAMILY = INTRINSIC_SERIAL_URL,
+    READABLE_STATE_PROTO_FAMILY = INTRINSIC_SERIAL_READABLE_STATE,
+    WRITABLE_STATE_PROTO_FAMILY = INTRINSIC_SERIAL_WRITABLE_STATE,
+    TIMEOUT_PROTO_FAMILY = INTRINSIC_SERIAL_TIMEOUT,
+    IMMEDIATE_PROTO_FAMILY = INTRINSIC_SERIAL_IMMEDIATE,
+);
+
 include!("runtime_layouts/records.rs");
 
 /// `child_process.spawnSync`'s result. Node gives it `error` first, and only
@@ -168,7 +185,7 @@ mod spawn_sync_result {
     runtime_atom!(SPAWN_SYNC_ATOM_PID, "pid", "706964");
     runtime_atom!(SPAWN_SYNC_ATOM_STDOUT, "stdout", "7374646f7574");
     runtime_atom!(SPAWN_SYNC_ATOM_STDERR, "stderr", "737464657272");
-    runtime_layout!(SPAWN_SYNC_RESULT, 0x5350_5359, 0, 0, [
+    runtime_layout!(SPAWN_SYNC_RESULT, 0x5350_5359, 0, crate::object::layout_desc::LAYOUT_PROTO_OBJECT, [
         SPAWN_SYNC_ATOM_ERROR => crate::object::key_attrs::ENTRY_OPTIONAL,
         RECORD_ATOM_88,
         RECORD_ATOM_189,
@@ -395,13 +412,6 @@ const fn atom_hash_prefix(bytes: &[u8], len: usize) -> u64 {
 #[inline]
 pub(crate) unsafe fn layout_id(desc: *const PerryLayoutDesc) -> u32 {
     (*desc).layout_id
-}
-
-/// The existing shape record owns the per-agent builtin prototype word.
-pub(crate) unsafe fn bind_builtin_prototype(desc: *const PerryLayoutDesc, bits: u64) {
-    let record = super::shapes::shape_descriptor_by_id(layout_id(desc))
-        .expect("layout registered before builtin creation");
-    super::shapes::write_identity_word(record.proto_id, bits);
 }
 
 #[used(linker)]
@@ -1155,7 +1165,7 @@ pub(crate) static mut READABLE_STATE: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 6,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 3,
+    proto: &raw const READABLE_STATE_PROTO_FAMILY,
     keys: READABLE_STATE_KEYS.as_ptr(),
     key_count: 6,
     index_mask: 15,
@@ -1239,7 +1249,7 @@ pub(crate) static mut WRITABLE_STATE: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 7,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 4,
+    proto: &raw const WRITABLE_STATE_PROTO_FAMILY,
     keys: WRITABLE_STATE_KEYS.as_ptr(),
     key_count: 7,
     index_mask: 15,
@@ -1276,7 +1286,7 @@ pub(crate) static mut URL_SEARCH_PARAMS: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 2,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: URL_SEARCH_PARAMS_KEYS.as_ptr(),
     key_count: 2,
     index_mask: 3,
@@ -1406,7 +1416,7 @@ pub(crate) static mut URL_COMPONENTS: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 12,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 2,
+    proto: &raw const URL_PROTO_FAMILY,
     keys: URL_COMPONENTS_KEYS.as_ptr(),
     key_count: 12,
     index_mask: 31,
@@ -1443,7 +1453,7 @@ pub(crate) static mut ITERATOR_RESULT: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 2,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: ITERATOR_RESULT_KEYS.as_ptr(),
     key_count: 2,
     index_mask: 3,
@@ -1480,7 +1490,7 @@ pub(crate) static mut ITERATOR_RESULT_DONE_FIRST: PerryLayoutDesc = PerryLayoutD
     slot_count: 2,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: ITERATOR_RESULT_DONE_FIRST_KEYS.as_ptr(),
     key_count: 2,
     index_mask: 3,
@@ -1504,7 +1514,7 @@ pub(crate) static mut TIMEOUT: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 0,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 5,
+    proto: &raw const TIMEOUT_PROTO_FAMILY,
     keys: TIMEOUT_KEYS.as_ptr(),
     key_count: 0,
     index_mask: 1,
@@ -1528,7 +1538,7 @@ pub(crate) static mut IMMEDIATE: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 0,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 6,
+    proto: &raw const IMMEDIATE_PROTO_FAMILY,
     keys: IMMEDIATE_KEYS.as_ptr(),
     key_count: 0,
     index_mask: 1,
@@ -1697,7 +1707,7 @@ pub(crate) static mut REGEX_EXEC_NAMED: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 4,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: REGEX_EXEC_NAMED_KEYS.as_ptr(),
     key_count: 4,
     index_mask: 7,
@@ -1769,7 +1779,7 @@ pub(crate) static mut REGEX_EXEC_INDICES_NAMED: PerryLayoutDesc = PerryLayoutDes
     slot_count: 5,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: REGEX_EXEC_INDICES_NAMED_KEYS.as_ptr(),
     key_count: 5,
     index_mask: 15,
@@ -1806,7 +1816,7 @@ pub(crate) static mut REGEX_INDICES_GROUPS_NAMED: PerryLayoutDesc = PerryLayoutD
     slot_count: 2,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: REGEX_INDICES_GROUPS_NAMED_KEYS.as_ptr(),
     key_count: 2,
     index_mask: 3,
@@ -1838,7 +1848,7 @@ pub(crate) static mut ARRAY_PROTOTYPE_NAMED: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: crate::object::BUILTIN_PROTOTYPE_ROOM,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: ARRAY_PROTOTYPE_NAMED_KEYS.as_ptr(),
     key_count: 1,
     index_mask: 1,
@@ -1863,7 +1873,7 @@ pub(crate) static mut ARRAY_NAMED: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 1,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: ARRAY_PROTOTYPE_NAMED_KEYS.as_ptr(),
     key_count: 1,
     index_mask: 1,
@@ -2056,7 +2066,7 @@ pub static mut SQLITE_COLUMN_METADATA: PerryLayoutDesc = PerryLayoutDesc {
     slot_count: 5,
     layout_id: super::layout_desc::LAYOUT_ID_CARRIED,
     rep: 0,
-    proto: 0,
+    proto: crate::object::layout_desc::LAYOUT_PROTO_OBJECT,
     keys: SQLITE_COLUMN_KEYS.as_ptr(),
     key_count: 5,
     index_mask: 15,
