@@ -182,6 +182,8 @@ fn shadow_hygiene_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -245,6 +247,8 @@ fn top_level_shadow_module(name: &str) -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -369,6 +373,8 @@ fn flat_const_row_alias_shadow_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -434,6 +440,8 @@ fn reassigned_any_shadow_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -514,6 +522,8 @@ fn mixed_any_alias_shadow_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -602,6 +612,8 @@ fn closure_captured_write_shadow_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 
@@ -1212,6 +1224,8 @@ fn canonical_str_shadow_module() -> Module {
         async_generator_funcs: std::collections::HashSet::new(),
         local_source_spans: std::collections::HashMap::new(),
         gen_param_prologue_len: std::collections::HashMap::new(),
+        class_family_syntax: None,
+        requested_modules: Vec::new(),
     }
 }
 

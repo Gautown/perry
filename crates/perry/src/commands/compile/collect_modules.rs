@@ -467,6 +467,7 @@ fn collect_module_one(
         }
     };
     let source_prep::PreparedSource {
+        class_family_syntax,
         source,
         was_cjs_wrapped,
         messages,
@@ -818,6 +819,7 @@ fn collect_module_one(
             return Err(e);
         }
     };
+    hir_module.class_family_syntax = class_family_syntax;
     *next_class_id = new_next_class_id; // Update the global class_id counter
 
     // #9599: Bun platform mode is a real global mode, not merely a direct-call
@@ -1008,9 +1010,8 @@ fn collect_module_one(
                                     new_dyn_imports.push(p.clone());
                                 }
                             }
-                            ctx.glob_candidate_files.extend(
-                                matches.files.iter().filter_map(|f| f.canonicalize().ok()),
-                            );
+                            ctx.glob_candidate_files
+                                .extend(matches.files.iter().filter_map(|f| f.canonicalize().ok()));
                             dynamic_path_sets.push(DynImportOutcome::Resolved(matches.specifiers));
                             return;
                         }
