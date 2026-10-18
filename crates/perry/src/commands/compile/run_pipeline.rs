@@ -569,6 +569,9 @@ pub fn run_with_parse_cache(
     use_color: bool,
     verbose: u8,
 ) -> Result<CompileResult> {
+    if perry_codegen::fallback_diag::enabled() {
+        perry_codegen::fallback_diag::reset();
+    }
     let typed_feedback = super::typed_feedback_profile::prepare(&args)?;
 
     // #4826: fold `--libc musl` into the effective target up-front (before any
@@ -855,7 +858,9 @@ pub fn run_with_parse_cache(
     // mapping whenever a later consumer needs original-source line numbers.
     // Text opt reports use the mapping for declaration snippets but do not
     // otherwise enable debug locations or symbols.
-    ctx.debug_symbols = args.debug_symbols || opt_report_format == Some(OptReportFormat::Text);
+    ctx.debug_symbols = args.debug_symbols
+        || opt_report_format == Some(OptReportFormat::Text)
+        || perry_codegen::fallback_diag::enabled();
 
     ctx.expression_defines = super::defines::load(&project_root, &args.define)?;
     ctx.parsed_defines = perry_parser::defines::Defines::parse(&ctx.expression_defines)?;
@@ -2895,8 +2900,11 @@ pub fn run_with_parse_cache(
             .ok()
             .as_deref()
             == Some("1");
-    let cache_enabled =
-        !args.no_cache && !cache_env_disabled && !verify_native_regions && typed_feedback.is_none();
+    let cache_enabled = !args.no_cache
+        && !cache_env_disabled
+        && !verify_native_regions
+        && typed_feedback.is_none()
+        && !perry_codegen::fallback_diag::enabled();
     // Target dir name for the cache layout. Using the resolved LLVM triple
     // keeps cross-compile caches from colliding with native-host caches.
     let cache_target_dir = target.as_deref().unwrap_or("host");
@@ -6016,7 +6024,9 @@ pub fn run_with_parse_cache(
             // wrapped line back to the original line. Non-wrapped modules
             // read the original from disk. Text reports need this source;
             // JSON reports only need the offset already carried by HIR.
-            module_source: if args.debug_symbols || opt_report_format == Some(OptReportFormat::Text)
+            module_source: if args.debug_symbols
+                || opt_report_format == Some(OptReportFormat::Text)
+                || perry_codegen::fallback_diag::enabled()
             {
                 match ctx.cjs_wrap_debug_sources.get(path) {
                     Some(w) => Some(w.wrapped_source.clone()),
@@ -6031,6 +6041,7 @@ pub fn run_with_parse_cache(
             // rendered location is in original-source coordinates. `0` for
             // non-wrapped modules (and the entire default build).
             debug_source_line_offset: if args.debug_symbols
+                || perry_codegen::fallback_diag::enabled()
                 || opt_report_format == Some(OptReportFormat::Text)
             {
                 ctx.cjs_wrap_debug_sources
@@ -8255,7 +8266,7 @@ pub fn run_with_parse_cache(
             is_tvos,
             is_watchos,
             is_harmonyos,
-        );
+        )?;
     }
 
     // Track Apple bundle info for CompileResult
