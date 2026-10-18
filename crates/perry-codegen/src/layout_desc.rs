@@ -1020,6 +1020,12 @@ pub(crate) fn emit_module_layouts(
             ));
         }
     }
+    // Append missing seeded atoms after existing layout atoms. This retains
+    // the startup ordering of unrelated keys while covering spilled contents.
+    for key in crate::codegen::static_shape_ids::module_seed_keys() {
+        atom(llmod, strings, &mut atoms, &key);
+    }
+
     n
 }
 
