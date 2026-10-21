@@ -5495,7 +5495,7 @@ dependencies = [
 
 [[package]]
 name = "perry-component-host"
-version = "0.5.1663"
+version = "0.5.1664"
 dependencies = [
  "anyhow",
  "perry-abi",
@@ -6295,7 +6295,7 @@ dependencies = [
 
 [[package]]
 name = "perry-wit"
-version = "0.5.1663"
+version = "0.5.1664"
 dependencies = [
  "anyhow",
  "heck 0.5.0",
