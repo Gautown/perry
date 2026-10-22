@@ -149,7 +149,12 @@ pub(super) fn emit_string_pool(
     // original source we retained. Each entry produces one
     // `js_register_function_source_static` call in `__perry_init_strings_<prefix>`
     // so `fn.toString()` can reconstruct the source.
-    user_fn_source: &[(String, std::borrow::Cow<'_, str>, bool)],
+    user_fn_source: &[(
+        String,
+        std::borrow::Cow<'_, str>,
+        bool,
+        perry_hir::types::FuncId,
+    )],
     // The templates the module evaluates per evaluation (`ClassExprFresh`):
     // their static methods' entries run in the function object's home.
     fresh_class_templates: &std::collections::HashSet<String>,
@@ -225,6 +230,7 @@ pub(super) fn emit_string_pool(
     let (user_fn_source_constants, class_source_constants) =
         super::retained_source_pool::prepare_ranges(
             llmod,
+            module_prefix,
             user_fn_source,
             classes,
             class_ids,
