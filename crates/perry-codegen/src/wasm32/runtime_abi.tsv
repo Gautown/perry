@@ -2127,6 +2127,8 @@ js_native_abi_check_u8	i8u	f64
 js_native_abi_check_usize	usize	f64
 js_native_abi_materialize_i64	f64	i64
 js_native_abi_materialize_u64	f64	i64
+js_native_alias_call_method	i32s	f64,ptr,usize,ptr,usize,ptr
+js_native_alias_get_property	i32s	f64,ptr,usize,ptr
 js_native_arena_alloc	ptr	i64
 js_native_arena_dispose	void	i64
 js_native_arena_view	ptr	i64,i32s,i64,i64
