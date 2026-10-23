@@ -271,6 +271,7 @@ js_async_disposable_stack_symbol_async_dispose	f64	ptr
 js_async_disposable_stack_use	f64	ptr,f64
 js_async_first_call	f64	f64
 js_async_fn_result	ptr	f64
+js_async_generator_create	f64	f64,ptr
 js_async_generator_resume	f64	f64,f64,f64
 js_async_hook_disable	f64	i64
 js_async_hook_enable	f64	i64
