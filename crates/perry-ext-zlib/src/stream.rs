@@ -14,6 +14,7 @@ extern "C" {
     fn js_zlib_stream_error(message: *const u8, len: usize, truncated: i32) -> f64;
     fn js_zlib_is_callback(value: f64) -> i32;
     fn js_zlib_stream_option(opts: f64, which: i32) -> usize;
+    fn js_zlib_decode_completion_options(opts: f64) -> i32;
     fn js_zlib_brotli_max_output_length(opts: f64) -> usize;
     fn js_zlib_gzip_codec_options(opts: f64) -> f64;
     fn js_zlib_gzip_base_options(opts: f64) -> f64;
@@ -35,7 +36,7 @@ mod deflate_context;
 mod driver;
 mod inflate_context;
 pub(crate) use deflate_context::encode_bytes as deflate_dictionary_bytes;
-pub(crate) use driver::{decode_bytes, decode_dictionary_bytes};
+pub(crate) use driver::{decode_bytes, decode_options_bytes, is_trailing_garbage};
 pub(crate) use inflate_context::needs_dictionary;
 mod one_shot_callback;
 mod zlib_encoder;
@@ -97,6 +98,19 @@ unsafe fn copy_dictionary(dictionary: f64) -> Option<Vec<u8>> {
             ErrorKind::TypeError,
         )
     }))
+}
+/// Native-only snapshot: no JS values or input borrows survive policy getters.
+#[derive(Default)]
+pub(crate) struct DecodePolicy {
+    reject_garbage: bool,
+    allow_incomplete: bool,
+}
+pub(crate) unsafe fn completion_options(opts: f64) -> DecodePolicy {
+    let flags = js_zlib_decode_completion_options(opts);
+    DecodePolicy {
+        reject_garbage: flags & 1 != 0,
+        allow_incomplete: flags & 2 != 0,
+    }
 }
 /// Capture user getters once per constructor phase; later consumers see only
 /// data properties. Copy dictionary bytes before the Transform spread can run.
