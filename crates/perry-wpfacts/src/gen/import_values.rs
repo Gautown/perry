@@ -664,18 +664,16 @@ impl<'a> Gen<'a> {
         // the layout (`lib.rs` records the read once this unit constructs).
         let d = format!("new {}", c.name);
         let held = match self.unit_in {
-            Some(u) if u.layout(&d).is_some() || u.broken(&d) => {
-                self.other_layout(&d).map(|cc| {
-                    self.stand_in_class(mi, cc);
-                    let tm = self.stand_ins[&d].1;
-                    let nv = self
-                        .m
-                        .node_named("newval", || format!("newval({})", c.name));
-                    let inst = self.m.tok(TokKind::Obj(tm, NO_CTX));
-                    self.m.add_tok(nv, inst);
-                    (nv, tm)
-                })
-            }
+            Some(u) if u.layout(&d).is_some() || u.broken(&d) => self.other_layout(&d).map(|cc| {
+                self.stand_in_class(mi, cc);
+                let tm = self.stand_ins[&d].1;
+                let nv = self
+                    .m
+                    .node_named("newval", || format!("newval({})", c.name));
+                let inst = self.m.tok(TokKind::Obj(tm, NO_CTX));
+                self.m.add_tok(nv, inst);
+                (nv, tm)
+            }),
             _ => None,
         };
         self.m.foreign_ctor.insert(fx, held);

@@ -1489,7 +1489,8 @@ pub(super) fn fn_inst_contract(
                     let key = m.atoms[k as usize].clone();
                     methods.push((key.clone(), m.funcs[fx as usize].name.clone()));
                     if m.contract_fns.contains(&fx) {
-                        method_fns.push((key, fn_contract_of(g, templates, fx, layouts_out, open_tm)));
+                        method_fns
+                            .push((key, fn_contract_of(g, templates, fx, layouts_out, open_tm)));
                     }
                 }
                 // A key read through the chain but never written (a lookup
