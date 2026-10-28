@@ -354,7 +354,7 @@ pub unsafe extern "C" fn perry_component_frame_bool(pointer: *mut c_void, value:
 pub unsafe extern "C" fn perry_component_frame_s64(pointer: *mut c_void, value: i64) -> u32 {
     frame(pointer).guard(|frame| {
         frame.add(crate::value::js_nanbox_bigint(
-            crate::bigint::js_bigint_from_i64(value) as i64,
+            crate::bigint_hooks::js_bigint_from_i64(value) as i64,
         ))
     })
 }
@@ -362,7 +362,7 @@ pub unsafe extern "C" fn perry_component_frame_s64(pointer: *mut c_void, value: 
 pub unsafe extern "C" fn perry_component_frame_u64(pointer: *mut c_void, value: u64) -> u32 {
     frame(pointer).guard(|frame| {
         frame.add(crate::value::js_nanbox_bigint(
-            crate::bigint::js_bigint_from_u64(value) as i64,
+            crate::bigint_hooks::js_bigint_from_u64(value) as i64,
         ))
     })
 }
@@ -398,7 +398,10 @@ pub unsafe extern "C" fn perry_component_frame_bytes(
 ) -> u32 {
     frame(pointer).guard(|frame| {
         let len = u32::try_from(len).unwrap_or_else(|_| fail("Component byte list is too long"));
-        let array = crate::typedarray::typed_array_alloc(crate::typedarray::KIND_UINT8, len);
+        let array = crate::typedarray_hook_slots::typed_array_alloc(
+            crate::typedarray_hook_slots::KIND_UINT8,
+            len,
+        );
         let slot = frame.add(crate::value::js_nanbox_pointer(array as i64));
         // The new array has no aliases. Copy its canonical byte list in one
         // allocation-free borrow; per-element JS setters spend guest fuel on
